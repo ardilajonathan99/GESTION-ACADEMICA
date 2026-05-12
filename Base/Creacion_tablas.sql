@@ -24,7 +24,7 @@ CREATE TABLE Profesores (
     id_p SERIAL PRIMARY KEY,
     nom_p VARCHAR(50) NOT NULL,
     dir_p VARCHAR(50),
-    tel_p VARCHAR(20),
+    tel_p VARCHAR(20) unique,
     profesion VARCHAR(50)
 );
 
@@ -32,7 +32,7 @@ CREATE TABLE Estudiantes (
     cod_e SERIAL PRIMARY KEY,
     nom_e VARCHAR(50) NOT NULL,
     dir_e VARCHAR(50),
-    tel_e VARCHAR(20),
+    tel_e VARCHAR(20)unique,
     fech_nac DATE,
     id_carr INT,
     CONSTRAINT fk_estudiante_carrera FOREIGN KEY (id_carr) REFERENCES Carreras(id_carr)
@@ -70,10 +70,16 @@ CREATE TABLE Inscribe (
     cod_a INT,
     id_p INT,
     grupo VARCHAR(10),
-    n1 NUMERIC(4,2), 
-    n2 NUMERIC(4,2),
-    n3 NUMERIC(4,2),
+    n1 NUMERIC(4,2) CHECK (n1 >= 0 AND n1 <= 5.0), 
+    n2 NUMERIC(4,2) CHECK (n1 >= 0 AND n1 <= 5.0),
+    n3 NUMERIC(4,2) CHECK (n1 >= 0 AND n1 <= 5.0),
     PRIMARY KEY (cod_e, cod_a, id_p, grupo),
     CONSTRAINT fk_inscribe_estudiante FOREIGN KEY (cod_e) REFERENCES Estudiantes(cod_e),
     CONSTRAINT fk_inscribe_imparte FOREIGN KEY (id_p, cod_a, grupo) REFERENCES Imparte(id_p, cod_a, grupo)
 );
+
+CREATE VIEW vw_notas_definitivas AS
+SELECT 
+    cod_e, cod_a, id_p, grupo, n1, n2, n3,
+    (n1 * 0.35 + n2 * 0.35 + n3 * 0.30) AS definitiva
+FROM Inscribe;
