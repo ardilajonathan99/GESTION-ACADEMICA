@@ -11,6 +11,6 @@ package com.mycompany.gestion.academica;
 public class GESTIONACADEMICA {
 
     public static void main(String[] args) {
-        System.out.println("Hello Wld!");
+        System.out.println("Hello World!");
     }
 }
