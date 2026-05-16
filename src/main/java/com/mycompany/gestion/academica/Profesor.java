@@ -8,7 +8,7 @@ package com.mycompany.gestion.academica;
  *
  * @author ardila
  */
-public class Profesor {
+public class Profesor extends Persona{
     private int idP;
     private String nomP;
     private String dirP;

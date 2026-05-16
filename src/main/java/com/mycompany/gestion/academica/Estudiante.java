@@ -8,7 +8,7 @@ import java.util.Date;
  *
  * @author ardila
  */
-public class Estudiante {
+public class Estudiante extends Persona {
     private int codE;
     private String nomE;
     private String dirE;
@@ -16,6 +16,16 @@ public class Estudiante {
     private Date fechNac;
     private Carrera carrera; // Relación con el objeto Carrera
 
+    public Estudiante(int codE, String nomE, String dirE, String telE, Date fechNac, Carrera carrera) {
+        this.codE = codE;
+        this.nomE = nomE;
+        this.dirE = dirE;
+        this.telE = telE;
+        this.fechNac = fechNac;
+        this.carrera = carrera;
+    }
+ 
+    
     public Estudiante() {}
 
     // Getters y Setters
