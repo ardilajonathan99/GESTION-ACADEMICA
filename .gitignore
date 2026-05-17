@@ -1,1 +1,8 @@
 /target/
+.DS_Store
+Thumbs.db
+*.class
+
+# Sin scripts Python en este proyecto
+*.py
+tools/
