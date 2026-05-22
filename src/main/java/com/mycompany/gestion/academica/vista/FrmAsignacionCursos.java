@@ -15,6 +15,7 @@ import com.mycompany.gestion.academica.modelo.Estudiante;
 import com.mycompany.gestion.academica.modelo.Inscripcion;
 import com.mycompany.gestion.academica.modelo.Profesor;
 import com.mycompany.gestion.academica.util.ComboItem;
+import com.mycompany.gestion.academica.util.Sesion;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
@@ -41,9 +42,24 @@ public class FrmAsignacionCursos extends javax.swing.JFrame {
         initComponents();
         configurarTabla();
         configurarEventos();
+        configurarVistaPorRol();
         cargarCombos();
         cargarTabla();
         setLocationRelativeTo(null);
+    }
+
+    private void configurarVistaPorRol() {
+        if (Sesion.esEstudiante()) {
+            setTitle("Inscripciones");
+            lblTitulo.setText("Mis inscripciones");
+            lblSubtitulo.setText("Inscríbase en los cursos que desea cursar");
+            pnlFormulario.setBorder(javax.swing.BorderFactory.createTitledBorder("Inscribirse a un curso"));
+        } else {
+            setTitle("Asignación de Cursos");
+            lblTitulo.setText("Asignación de cursos");
+            lblSubtitulo.setText("Asigne cursos impartidos a los estudiantes");
+            pnlFormulario.setBorder(javax.swing.BorderFactory.createTitledBorder("Inscripción a curso"));
+        }
     }
 
     private void configurarTabla() {
@@ -83,7 +99,6 @@ public class FrmAsignacionCursos extends javax.swing.JFrame {
         btnModificar = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
         btnLimpiar = new javax.swing.JButton();
-        btnCerrar = new javax.swing.JButton();
         scrollTabla = new javax.swing.JScrollPane();
         tblDatos = new javax.swing.JTable();
 
@@ -156,12 +171,6 @@ public class FrmAsignacionCursos extends javax.swing.JFrame {
         btnModificar.setText("Modificar");
         btnEliminar.setText("Eliminar");
         btnLimpiar.setText("Limpiar");
-        btnCerrar.setText("Cerrar");
-        btnCerrar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCerrarActionPerformed(evt);
-            }
-        });
 
         pnlBotones.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 8));
         pnlBotones.add(btnNuevo);
@@ -169,7 +178,6 @@ public class FrmAsignacionCursos extends javax.swing.JFrame {
         pnlBotones.add(btnModificar);
         pnlBotones.add(btnEliminar);
         pnlBotones.add(btnLimpiar);
-        pnlBotones.add(btnCerrar);
 
         tblDatos.setRowHeight(24);
         scrollTabla.setViewportView(tblDatos);
@@ -192,10 +200,6 @@ public class FrmAsignacionCursos extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnCerrarActionPerformed(java.awt.event.ActionEvent evt) {
-        dispose();
-    }
-
     private void configurarEventos() {
         btnNuevo.addActionListener(e -> limpiarCampos());
         btnInscribir.addActionListener(e -> inscribir());
@@ -215,11 +219,20 @@ public class FrmAsignacionCursos extends javax.swing.JFrame {
     private void cargarCombos() {
         try {
             DefaultComboBoxModel<ComboItem> estModel = new DefaultComboBoxModel<>();
-            estModel.addElement(new ComboItem(0, "-- Seleccione --"));
-            for (Estudiante e : estudianteController.listar()) {
-                estModel.addElement(new ComboItem(e.getCodE(), e.getCodE() + " - " + e.getNomE()));
+            if (Sesion.esEstudiante()) {
+                estModel.addElement(new ComboItem(
+                        Sesion.getIdUsuario(),
+                        Sesion.getIdUsuario() + " - " + Sesion.getNombre()));
+                cmbEstudiante.setModel(estModel);
+                cmbEstudiante.setEnabled(false);
+                codESeleccionado = Sesion.getIdUsuario();
+            } else {
+                estModel.addElement(new ComboItem(0, "-- Seleccione --"));
+                for (Estudiante e : estudianteController.listar()) {
+                    estModel.addElement(new ComboItem(e.getCodE(), e.getCodE() + " - " + e.getNomE()));
+                }
+                cmbEstudiante.setModel(estModel);
             }
-            cmbEstudiante.setModel(estModel);
 
             DefaultComboBoxModel<ComboItem> asigModel = new DefaultComboBoxModel<>();
             asigModel.addElement(new ComboItem(0, "-- Seleccione --"));
@@ -311,13 +324,15 @@ public class FrmAsignacionCursos extends javax.swing.JFrame {
         ComboItem asigItem = (ComboItem) cmbAsignatura.getSelectedItem();
         ComboItem profItem = (ComboItem) cmbProfesor.getSelectedItem();
         String grupo = (String) cmbGrupo.getSelectedItem();
-        if (estItem.getId() <= 0 || asigItem.getId() <= 0 || profItem.getId() <= 0 || grupo == null || grupo.startsWith("--")) {
+        int codE = Sesion.esEstudiante() ? Sesion.getIdUsuario() : (estItem != null ? estItem.getId() : 0);
+        if (codE <= 0 || asigItem == null || asigItem.getId() <= 0 || profItem == null || profItem.getId() <= 0
+                || grupo == null || grupo.startsWith("--")) {
             JOptionPane.showMessageDialog(this, "Complete todos los campos de la inscripción.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
             Estudiante e = new Estudiante();
-            e.setCodE(estItem.getId());
+            e.setCodE(codE);
             Profesor p = new Profesor();
             p.setIdP(profItem.getId());
             Asignatura a = new Asignatura();
@@ -379,11 +394,15 @@ public class FrmAsignacionCursos extends javax.swing.JFrame {
     }
 
     private void limpiarCampos() {
-        codESeleccionado = 0;
         codASeleccionado = 0;
         idPSeleccionado = 0;
         grupoSeleccionado = "";
-        cmbEstudiante.setSelectedIndex(0);
+        if (Sesion.esEstudiante()) {
+            codESeleccionado = Sesion.getIdUsuario();
+        } else {
+            codESeleccionado = 0;
+            cmbEstudiante.setSelectedIndex(0);
+        }
         cmbAsignatura.setSelectedIndex(0);
         cargarProfesoresPorAsignatura();
         txtHorario.setText("");
@@ -396,7 +415,6 @@ public class FrmAsignacionCursos extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnCerrar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnInscribir;
     private javax.swing.JButton btnLimpiar;

@@ -5,10 +5,11 @@
 package com.mycompany.gestion.academica.vista;
 
 import com.mycompany.gestion.academica.controlador.EstudianteController;
-import com.mycompany.gestion.academica.controlador.InscripcionController;
+import com.mycompany.gestion.academica.controlador.NotaController;
 import com.mycompany.gestion.academica.dao.InscribeDAO.InscripcionDetalle;
 import com.mycompany.gestion.academica.modelo.Estudiante;
 import com.mycompany.gestion.academica.util.ComboItem;
+import com.mycompany.gestion.academica.util.Sesion;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
@@ -20,9 +21,11 @@ import javax.swing.table.DefaultTableModel;
  */
 public class FrmNotas extends javax.swing.JFrame {
 
-    private final InscripcionController inscripcionController = new InscripcionController();
+    private final NotaController notaController = new NotaController();
     private final EstudianteController estudianteController = new EstudianteController();
     private final List<InscripcionDetalle> cursosEstudiante = new ArrayList<>();
+    private final List<InscripcionDetalle> registrosTabla = new ArrayList<>();
+    private final boolean modoProfesor;
 
     private int codESeleccionado;
     private int codASeleccionado;
@@ -30,12 +33,29 @@ public class FrmNotas extends javax.swing.JFrame {
     private String grupoSeleccionado = "";
 
     public FrmNotas() {
+        modoProfesor = Sesion.esProfesor();
         initComponents();
         configurarTabla();
+        configurarVistaPorRol();
         configurarEventos();
-        cargarCombos();
+        if (!modoProfesor) {
+            cargarCombos();
+        }
         cargarTabla();
         setLocationRelativeTo(null);
+    }
+
+    private void configurarVistaPorRol() {
+        if (modoProfesor) {
+            lblSubtitulo.setText("Seleccione un registro en la tabla (solo sus cursos) para registrar notas");
+            pnlFormulario.setBorder(javax.swing.BorderFactory.createTitledBorder("Notas del registro seleccionado"));
+            lblEstudiante.setVisible(false);
+            cmbEstudiante.setVisible(false);
+            lblCursoInscrito.setVisible(false);
+            cmbCursoInscrito.setVisible(false);
+            btnNuevo.setVisible(false);
+            btnCalcular.setVisible(false);
+        }
     }
 
     private static class CursoInscritoItem {
@@ -62,10 +82,11 @@ public class FrmNotas extends javax.swing.JFrame {
         btnModificar.addActionListener(e -> guardarNotas());
         btnEliminar.addActionListener(e -> limpiarNotas());
         btnLimpiar.addActionListener(e -> limpiarCampos());
-        btnCalcular.addActionListener(e -> calcularDefinitiva());
-        btnCerrar.addActionListener(e -> dispose());
-        cmbEstudiante.addActionListener(e -> cargarCursosPorEstudiante());
-        cmbCursoInscrito.addActionListener(e -> cargarNotasDelCurso());
+        if (!modoProfesor) {
+            btnCalcular.addActionListener(e -> calcularDefinitiva());
+            cmbEstudiante.addActionListener(e -> cargarCursosPorEstudiante());
+            cmbCursoInscrito.addActionListener(e -> cargarNotasDelCurso());
+        }
         tblDatos.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && tblDatos.getSelectedRow() >= 0) {
                 cargarFilaSeleccionada(tblDatos.getSelectedRow());
@@ -99,7 +120,7 @@ public class FrmNotas extends javax.swing.JFrame {
             return;
         }
         try {
-            List<InscripcionDetalle> lista = inscripcionController.listarPorEstudiante(estItem.getId());
+            List<InscripcionDetalle> lista = notaController.listarPorEstudiante(estItem.getId());
             cursosEstudiante.addAll(lista);
             for (InscripcionDetalle d : lista) {
                 cursoModel.addElement(new CursoInscritoItem(d));
@@ -115,27 +136,16 @@ public class FrmNotas extends javax.swing.JFrame {
         if (item == null) {
             return;
         }
-        InscripcionDetalle d = item.getDetalle();
-        codESeleccionado = d.getCodE();
-        codASeleccionado = d.getCodA();
-        idPSeleccionado = d.getIdP();
-        grupoSeleccionado = d.getGrupo();
-        txtN1.setText(d.getN1() != null ? String.valueOf(d.getN1()) : "");
-        txtN2.setText(d.getN2() != null ? String.valueOf(d.getN2()) : "");
-        txtN3.setText(d.getN3() != null ? String.valueOf(d.getN3()) : "");
-        if (d.getDefinitiva() != null) {
-            txtDefinitiva.setText(String.format("%.2f", d.getDefinitiva()));
-        } else {
-            txtDefinitiva.setText("");
-        }
+        cargarDetalleDesde(item.getDetalle());
     }
 
     private void cargarTabla() {
         try {
-            List<InscripcionDetalle> lista = inscripcionController.listarDetalle();
+            registrosTabla.clear();
+            registrosTabla.addAll(notaController.listarParaRegistro());
             DefaultTableModel modelo = (DefaultTableModel) tblDatos.getModel();
             modelo.setRowCount(0);
-            for (InscripcionDetalle d : lista) {
+            for (InscripcionDetalle d : registrosTabla) {
                 modelo.addRow(new Object[]{
                     d.getNomEstudiante(),
                     d.etiquetaCurso(),
@@ -156,18 +166,28 @@ public class FrmNotas extends javax.swing.JFrame {
 
     private void guardarNotas() {
         if (codESeleccionado <= 0 || codASeleccionado <= 0 || idPSeleccionado <= 0 || grupoSeleccionado.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Seleccione estudiante y curso inscrito.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            String aviso = modoProfesor
+                    ? "Seleccione un registro en la tabla."
+                    : "Seleccione estudiante y curso inscrito.";
+            JOptionPane.showMessageDialog(this, aviso, "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
             double n1 = Double.parseDouble(txtN1.getText().trim());
             double n2 = Double.parseDouble(txtN2.getText().trim());
             double n3 = Double.parseDouble(txtN3.getText().trim());
-            inscripcionController.guardarNotas(codESeleccionado, codASeleccionado, idPSeleccionado, grupoSeleccionado, n1, n2, n3);
-            calcularDefinitiva();
+            double definitiva = notaController.calcularDefinitiva(n1, n2, n3);
+            notaController.registrarNotas(codESeleccionado, codASeleccionado, idPSeleccionado, grupoSeleccionado, n1, n2, n3);
+            txtDefinitiva.setText(String.format("%.2f", definitiva));
+            int filaGuardada = tblDatos.getSelectedRow();
             cargarTabla();
-            cargarCursosPorEstudiante();
-            JOptionPane.showMessageDialog(this, "Notas guardadas correctamente.");
+            if (filaGuardada >= 0 && filaGuardada < registrosTabla.size()) {
+                tblDatos.setRowSelectionInterval(filaGuardada, filaGuardada);
+                cargarDetalleDesde(registrosTabla.get(filaGuardada));
+            } else if (!modoProfesor) {
+                cargarCursosPorEstudiante();
+            }
+            JOptionPane.showMessageDialog(this, "Notas guardadas. Definitiva: " + String.format("%.2f", definitiva));
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Ingrese notas numéricas válidas.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
@@ -181,9 +201,11 @@ public class FrmNotas extends javax.swing.JFrame {
             return;
         }
         try {
-            inscripcionController.guardarNotas(codESeleccionado, codASeleccionado, idPSeleccionado, grupoSeleccionado, 0, 0, 0);
+            notaController.registrarNotas(codESeleccionado, codASeleccionado, idPSeleccionado, grupoSeleccionado, 0, 0, 0);
             cargarTabla();
-            cargarCursosPorEstudiante();
+            if (!modoProfesor) {
+                cargarCursosPorEstudiante();
+            }
             limpiarCampos();
         } catch (Exception ex) {
             mostrarError(ex);
@@ -191,9 +213,15 @@ public class FrmNotas extends javax.swing.JFrame {
     }
 
     private void cargarFilaSeleccionada(int fila) {
+        if (fila < 0 || fila >= registrosTabla.size()) {
+            return;
+        }
+        if (modoProfesor) {
+            cargarDetalleDesde(registrosTabla.get(fila));
+            return;
+        }
         try {
-            List<InscripcionDetalle> lista = inscripcionController.listarDetalle();
-            InscripcionDetalle d = lista.get(fila);
+            InscripcionDetalle d = registrosTabla.get(fila);
             seleccionarCombo(cmbEstudiante, d.getCodE());
             cargarCursosPorEstudiante();
             for (int i = 0; i < cmbCursoInscrito.getItemCount(); i++) {
@@ -211,6 +239,21 @@ public class FrmNotas extends javax.swing.JFrame {
         }
     }
 
+    private void cargarDetalleDesde(InscripcionDetalle d) {
+        codESeleccionado = d.getCodE();
+        codASeleccionado = d.getCodA();
+        idPSeleccionado = d.getIdP();
+        grupoSeleccionado = d.getGrupo();
+        txtN1.setText(d.getN1() != null ? String.valueOf(d.getN1()) : "");
+        txtN2.setText(d.getN2() != null ? String.valueOf(d.getN2()) : "");
+        txtN3.setText(d.getN3() != null ? String.valueOf(d.getN3()) : "");
+        if (d.getDefinitiva() != null) {
+            txtDefinitiva.setText(String.format("%.2f", d.getDefinitiva()));
+        } else {
+            txtDefinitiva.setText("");
+        }
+    }
+
     private void seleccionarCombo(javax.swing.JComboBox<ComboItem> combo, int id) {
         for (int i = 0; i < combo.getItemCount(); i++) {
             if (combo.getItemAt(i).getId() == id) {
@@ -225,8 +268,14 @@ public class FrmNotas extends javax.swing.JFrame {
         codASeleccionado = 0;
         idPSeleccionado = 0;
         grupoSeleccionado = "";
-        cmbEstudiante.setSelectedIndex(0);
-        cargarCursosPorEstudiante();
+        txtN1.setText("");
+        txtN2.setText("");
+        txtN3.setText("");
+        txtDefinitiva.setText("");
+        if (!modoProfesor) {
+            cmbEstudiante.setSelectedIndex(0);
+            cargarCursosPorEstudiante();
+        }
         tblDatos.clearSelection();
     }
 
@@ -240,7 +289,7 @@ public class FrmNotas extends javax.swing.JFrame {
             double n1 = Double.parseDouble(txtN1.getText().trim());
             double n2 = Double.parseDouble(txtN2.getText().trim());
             double n3 = Double.parseDouble(txtN3.getText().trim());
-            double definitiva = inscripcionController.calcularDefinitiva(n1, n2, n3);
+            double definitiva = notaController.calcularDefinitiva(n1, n2, n3);
             txtDefinitiva.setText(String.format("%.2f", definitiva));
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Ingrese notas numéricas válidas.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -289,7 +338,6 @@ public class FrmNotas extends javax.swing.JFrame {
         btnEliminar = new javax.swing.JButton();
         btnLimpiar = new javax.swing.JButton();
         btnCalcular = new javax.swing.JButton();
-        btnCerrar = new javax.swing.JButton();
         scrollTabla = new javax.swing.JScrollPane();
         tblDatos = new javax.swing.JTable();
 
@@ -377,12 +425,6 @@ public class FrmNotas extends javax.swing.JFrame {
         btnEliminar.setText("Eliminar");
         btnLimpiar.setText("Limpiar");
         btnCalcular.setText("Calcular");
-        btnCerrar.setText("Cerrar");
-        btnCerrar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCerrarActionPerformed(evt);
-            }
-        });
 
         pnlBotones.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 8));
         pnlBotones.add(btnNuevo);
@@ -391,7 +433,6 @@ public class FrmNotas extends javax.swing.JFrame {
         pnlBotones.add(btnEliminar);
         pnlBotones.add(btnLimpiar);
         pnlBotones.add(btnCalcular);
-        pnlBotones.add(btnCerrar);
 
         tblDatos.setRowHeight(24);
         scrollTabla.setViewportView(tblDatos);
@@ -414,13 +455,8 @@ public class FrmNotas extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnCerrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarActionPerformed
-        dispose();
-    }//GEN-LAST:event_btnCerrarActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCalcular;
-    private javax.swing.JButton btnCerrar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnLimpiar;

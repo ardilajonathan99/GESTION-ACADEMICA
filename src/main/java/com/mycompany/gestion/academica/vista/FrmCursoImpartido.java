@@ -11,6 +11,8 @@ import com.mycompany.gestion.academica.modelo.Asignatura;
 import com.mycompany.gestion.academica.modelo.CursoImpartido;
 import com.mycompany.gestion.academica.modelo.Profesor;
 import com.mycompany.gestion.academica.util.ComboItem;
+import com.mycompany.gestion.academica.util.Sesion;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
@@ -25,17 +27,45 @@ public class FrmCursoImpartido extends javax.swing.JFrame {
     private final ProfesorController profesorController = new ProfesorController();
     private final AsignaturaController asignaturaController = new AsignaturaController();
 
+    private final List<CursoImpartido> registrosTabla = new ArrayList<>();
+    private final boolean modoProfesor;
+
     private int idPSeleccionado;
     private int codASeleccionado;
     private String grupoSeleccionado = "";
 
     public FrmCursoImpartido() {
+        modoProfesor = Sesion.esProfesor();
         initComponents();
         configurarTabla();
+        configurarVistaPorRol();
         configurarEventos();
-        cargarCombos();
+        if (!modoProfesor) {
+            cargarCombos();
+        }
         cargarTabla();
         setLocationRelativeTo(null);
+    }
+
+    private void configurarVistaPorRol() {
+        if (!modoProfesor) {
+            return;
+        }
+        setTitle("Consulta de Cursos Impartidos");
+        lblTitulo.setText("Mis cursos impartidos");
+        pnlFormulario.setBorder(javax.swing.BorderFactory.createTitledBorder("Detalle del curso (solo lectura)"));
+        lblProfesor.setVisible(false);
+        cmbProfesor.setVisible(false);
+        lblAsignatura.setVisible(false);
+        cmbAsignatura.setVisible(false);
+        txtGrupo.setEditable(false);
+        txtHorario.setEditable(false);
+        btnNuevo.setVisible(false);
+        btnGuardar.setVisible(false);
+        btnModificar.setVisible(false);
+        btnEliminar.setVisible(false);
+        btnLimpiar.setVisible(false);
+        pnlBotones.setVisible(false);
     }
 
     private void configurarTabla() {
@@ -72,7 +102,6 @@ public class FrmCursoImpartido extends javax.swing.JFrame {
         btnModificar = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
         btnLimpiar = new javax.swing.JButton();
-        btnCerrar = new javax.swing.JButton();
         scrollTabla = new javax.swing.JScrollPane();
         tblDatos = new javax.swing.JTable();
 
@@ -130,12 +159,6 @@ public class FrmCursoImpartido extends javax.swing.JFrame {
         btnModificar.setText("Modificar");
         btnEliminar.setText("Eliminar");
         btnLimpiar.setText("Limpiar");
-        btnCerrar.setText("Cerrar");
-        btnCerrar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCerrarActionPerformed(evt);
-            }
-        });
 
         pnlBotones.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 8));
         pnlBotones.add(btnNuevo);
@@ -143,7 +166,6 @@ public class FrmCursoImpartido extends javax.swing.JFrame {
         pnlBotones.add(btnModificar);
         pnlBotones.add(btnEliminar);
         pnlBotones.add(btnLimpiar);
-        pnlBotones.add(btnCerrar);
 
         tblDatos.setRowHeight(24);
         scrollTabla.setViewportView(tblDatos);
@@ -165,16 +187,14 @@ public class FrmCursoImpartido extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnCerrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarActionPerformed
-        dispose();
-    }//GEN-LAST:event_btnCerrarActionPerformed
-
     private void configurarEventos() {
-        btnNuevo.addActionListener(e -> limpiarCampos());
-        btnGuardar.addActionListener(e -> guardarCurso());
-        btnModificar.addActionListener(e -> guardarCurso());
-        btnEliminar.addActionListener(e -> eliminarCurso());
-        btnLimpiar.addActionListener(e -> limpiarCampos());
+        if (!modoProfesor) {
+            btnNuevo.addActionListener(e -> limpiarCampos());
+            btnGuardar.addActionListener(e -> guardarCurso());
+            btnModificar.addActionListener(e -> guardarCurso());
+            btnEliminar.addActionListener(e -> eliminarCurso());
+            btnLimpiar.addActionListener(e -> limpiarCampos());
+        }
         tblDatos.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && tblDatos.getSelectedRow() >= 0) {
                 cargarFilaSeleccionada(tblDatos.getSelectedRow());
@@ -204,18 +224,22 @@ public class FrmCursoImpartido extends javax.swing.JFrame {
 
     private void cargarTabla() {
         try {
-            List<CursoImpartido> lista = imparteController.listar();
+            registrosTabla.clear();
+            registrosTabla.addAll(imparteController.listar());
             DefaultTableModel modelo = (DefaultTableModel) tblDatos.getModel();
             modelo.setRowCount(0);
-            for (CursoImpartido c : lista) {
+            for (CursoImpartido c : registrosTabla) {
                 modelo.addRow(new Object[]{
                     c.getProfesor().getIdP(),
                     c.getProfesor().getNomP(),
                     c.getAsignatura().getCodA(),
                     c.getAsignatura().getNomA(),
                     c.getGrupo(),
-                    c.getHorario()
+                    c.getHorario() != null ? c.getHorario() : ""
                 });
+            }
+            if (modoProfesor) {
+                limpiarDetalle();
             }
         } catch (Exception ex) {
             mostrarError(ex);
@@ -266,14 +290,28 @@ public class FrmCursoImpartido extends javax.swing.JFrame {
     }
 
     private void cargarFilaSeleccionada(int fila) {
-        DefaultTableModel modelo = (DefaultTableModel) tblDatos.getModel();
-        idPSeleccionado = (Integer) modelo.getValueAt(fila, 0);
-        codASeleccionado = (Integer) modelo.getValueAt(fila, 2);
-        grupoSeleccionado = String.valueOf(modelo.getValueAt(fila, 4));
-        seleccionarCombo(cmbProfesor, idPSeleccionado);
-        seleccionarCombo(cmbAsignatura, codASeleccionado);
+        if (fila < 0 || fila >= registrosTabla.size()) {
+            return;
+        }
+        CursoImpartido c = registrosTabla.get(fila);
+        idPSeleccionado = c.getProfesor().getIdP();
+        codASeleccionado = c.getAsignatura().getCodA();
+        grupoSeleccionado = c.getGrupo();
         txtGrupo.setText(grupoSeleccionado);
-        txtHorario.setText(String.valueOf(modelo.getValueAt(fila, 5)));
+        txtHorario.setText(c.getHorario() != null ? c.getHorario() : "");
+        if (!modoProfesor) {
+            seleccionarCombo(cmbProfesor, idPSeleccionado);
+            seleccionarCombo(cmbAsignatura, codASeleccionado);
+        }
+    }
+
+    private void limpiarDetalle() {
+        idPSeleccionado = 0;
+        codASeleccionado = 0;
+        grupoSeleccionado = "";
+        txtGrupo.setText("");
+        txtHorario.setText("");
+        tblDatos.clearSelection();
     }
 
     private void seleccionarCombo(javax.swing.JComboBox<ComboItem> combo, int id) {
@@ -286,6 +324,10 @@ public class FrmCursoImpartido extends javax.swing.JFrame {
     }
 
     private void limpiarCampos() {
+        if (modoProfesor) {
+            limpiarDetalle();
+            return;
+        }
         idPSeleccionado = 0;
         codASeleccionado = 0;
         grupoSeleccionado = "";
@@ -302,7 +344,6 @@ public class FrmCursoImpartido extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnCerrar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnLimpiar;

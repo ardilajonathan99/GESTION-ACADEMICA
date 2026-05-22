@@ -58,7 +58,6 @@ public class FrmCarrera extends javax.swing.JFrame {
         btnModificar = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
         btnLimpiar = new javax.swing.JButton();
-        btnCerrar = new javax.swing.JButton();
         scrollTabla = new javax.swing.JScrollPane();
         tblDatos = new javax.swing.JTable();
 
@@ -111,12 +110,6 @@ public class FrmCarrera extends javax.swing.JFrame {
         btnModificar.setText("Modificar");
         btnEliminar.setText("Eliminar");
         btnLimpiar.setText("Limpiar");
-        btnCerrar.setText("Cerrar");
-        btnCerrar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCerrarActionPerformed(evt);
-            }
-        });
 
         pnlBotones.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 8, 8));
         pnlBotones.add(btnNuevo);
@@ -124,7 +117,6 @@ public class FrmCarrera extends javax.swing.JFrame {
         pnlBotones.add(btnModificar);
         pnlBotones.add(btnEliminar);
         pnlBotones.add(btnLimpiar);
-        pnlBotones.add(btnCerrar);
 
         tblDatos.setRowHeight(24);
         scrollTabla.setViewportView(tblDatos);
@@ -145,10 +137,6 @@ public class FrmCarrera extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnCerrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCerrarActionPerformed
-        dispose();
-    }//GEN-LAST:event_btnCerrarActionPerformed
 
     private void configurarEventos() {
         btnNuevo.addActionListener(e -> limpiarCampos());
@@ -236,7 +224,6 @@ public class FrmCarrera extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnCerrar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnLimpiar;

@@ -19,11 +19,11 @@ import java.sql.SQLException;
  */
 public final class ConexionBD {
 
-    private static final String HOST = config("DB_HOST", "localhost");
-    private static final String PORT = config("DB_PORT", "5432");
-    private static final String DATABASE = config("DB_NAME", "postgres");
-    private static final String USER = config("DB_USER", "postgres");
-    private static final String PASSWORD = System.getenv("DB_PASSWORD");
+    private static final String HOST = "gestion-academica.cm7o0yekoeve.us-east-1.rds.amazonaws.com";
+    private static final String PORT = "5432";
+    private static final String DATABASE = "postgres"; // Cambiar por 'gestion-academica' si creaste un contenedor específico
+    private static final String USER = "postgres";
+    private static final String PASSWORD = "Informatica2026"; // Coloca aquí la contraseña real
 
     private ConexionBD() {
     }

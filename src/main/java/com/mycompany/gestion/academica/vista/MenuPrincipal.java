@@ -33,7 +33,9 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnRequisitos = new javax.swing.JButton();
         btnCursosImpartidos = new javax.swing.JButton();
         btnAsignacionCursos = new javax.swing.JButton();
+        btnInscripciones = new javax.swing.JButton();
         btnRegistroNotas = new javax.swing.JButton();
+        btnConsultaNotas = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -150,6 +152,18 @@ public class MenuPrincipal extends javax.swing.JFrame {
             }
         });
 
+        btnInscripciones.setFont(new java.awt.Font("Segoe UI", 0, 13));
+        btnInscripciones.setMinimumSize(tamBoton);
+        btnInscripciones.setPreferredSize(tamBoton);
+        btnInscripciones.setText("Inscripciones");
+        btnInscripciones.addActionListener(evt -> abrirFormulario(new FrmAsignacionCursos()));
+
+        btnConsultaNotas.setFont(new java.awt.Font("Segoe UI", 0, 13));
+        btnConsultaNotas.setMinimumSize(tamBoton);
+        btnConsultaNotas.setPreferredSize(tamBoton);
+        btnConsultaNotas.setText("Consulta de Notas");
+        btnConsultaNotas.addActionListener(evt -> abrirFormulario(new FrmConsultaNotas()));
+
         btnSalir.setFont(new java.awt.Font("Segoe UI", 0, 13));
         btnSalir.setText("Salir");
         btnSalir.addActionListener(new java.awt.event.ActionListener() {
@@ -245,8 +259,16 @@ public class MenuPrincipal extends javax.swing.JFrame {
         btnAsignaturaCarrera.setVisible(admin);
         btnRequisitos.setVisible(admin);
         btnCursosImpartidos.setVisible(admin || profesor);
-        btnAsignacionCursos.setVisible(admin || estudiante);
-        btnRegistroNotas.setVisible(admin || estudiante || profesor);
+        btnAsignacionCursos.setVisible(admin);
+        btnInscripciones.setVisible(estudiante);
+        btnRegistroNotas.setVisible(admin || profesor);
+        btnConsultaNotas.setVisible(estudiante);
+
+        if (profesor) {
+            btnCursosImpartidos.setText("Consulta de Cursos");
+        } else {
+            btnCursosImpartidos.setText("Cursos Impartidos");
+        }
 
         lblSubtitulo.setText("Bienvenido, " + Sesion.getNombre()
                 + " — " + etiquetaRol());
@@ -273,7 +295,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
         javax.swing.JButton[] botones = {
             btnCarreras, btnAsignaturas, btnRegistroUsuarios, btnAsignaturaCarrera,
-            btnRequisitos, btnCursosImpartidos, btnAsignacionCursos, btnRegistroNotas
+            btnRequisitos, btnCursosImpartidos, btnAsignacionCursos, btnInscripciones,
+            btnRegistroNotas, btnConsultaNotas
         };
         int visibles = 0;
         for (javax.swing.JButton boton : botones) {
@@ -298,6 +321,8 @@ public class MenuPrincipal extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAsignacionCursos;
+    private javax.swing.JButton btnConsultaNotas;
+    private javax.swing.JButton btnInscripciones;
     private javax.swing.JButton btnAsignaturaCarrera;
     private javax.swing.JButton btnAsignaturas;
     private javax.swing.JButton btnCarreras;

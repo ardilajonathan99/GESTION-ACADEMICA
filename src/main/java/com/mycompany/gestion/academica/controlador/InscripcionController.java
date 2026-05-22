@@ -18,19 +18,15 @@ public class InscripcionController {
         return inscripcionService.listarPorEstudiante(codE);
     }
 
+    public List<InscripcionDetalle> listarMisNotas() throws SQLException {
+        return inscripcionService.listarMisNotas();
+    }
+
     public void inscribir(Inscripcion inscripcion) throws SQLException {
         inscripcionService.inscribir(inscripcion);
     }
 
-    public void guardarNotas(int codE, int codA, int idP, String grupo, double n1, double n2, double n3) throws SQLException {
-        inscripcionService.guardarNotas(codE, codA, idP, grupo, n1, n2, n3);
-    }
-
     public void eliminar(int codE, int codA, int idP, String grupo) throws SQLException {
         inscripcionService.eliminar(codE, codA, idP, grupo);
-    }
-
-    public double calcularDefinitiva(double n1, double n2, double n3) {
-        return inscripcionService.calcularDefinitiva(n1, n2, n3);
     }
 }

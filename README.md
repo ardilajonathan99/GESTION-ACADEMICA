@@ -81,9 +81,9 @@ mvn compile exec:java
 
 ### Menú por rol
 
-- **Administrador:** todas las opciones.
-- **Estudiante:** Asignación de cursos, Registro de notas.
-- **Profesor:** Cursos impartidos, Registro de notas.
+- **Administrador:** todas las opciones (incluye **Asignación de cursos** para matricular estudiantes).
+- **Estudiante:** Inscripciones (inscribirse a cursos), Consulta de notas (solo lectura).
+- **Profesor:** Consulta de cursos impartidos (solo lectura), Registro de notas.
 
 La sesión activa se guarda en `util.Sesion`.
 

@@ -33,6 +33,29 @@ public class ImparteDAO {
         return lista;
     }
 
+    public List<CursoImpartido> listarPorProfesor(int idP) throws SQLException {
+        List<CursoImpartido> lista = new ArrayList<>();
+        String sql = """
+            SELECT i.id_p, i.cod_a, i.grupo, i.horario,
+                   p.nom_p, a.nom_a
+            FROM Imparte i
+            JOIN Profesores p ON i.id_p = p.id_p
+            JOIN Asignaturas a ON i.cod_a = a.cod_a
+            WHERE i.id_p = ?
+            ORDER BY a.nom_a, i.grupo
+            """;
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idP);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapear(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
     public List<CursoImpartido> listarPorAsignatura(int codA) throws SQLException {
         List<CursoImpartido> lista = new ArrayList<>();
         String sql = """

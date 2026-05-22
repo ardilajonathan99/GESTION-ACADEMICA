@@ -72,6 +72,33 @@ public class InscribeDAO {
         return lista;
     }
 
+    public List<InscripcionDetalle> listarPorProfesor(int idP) throws SQLException {
+        List<InscripcionDetalle> lista = new ArrayList<>();
+        String sql = """
+            SELECT i.cod_e, i.cod_a, i.id_p, i.grupo,
+                   e.nom_e, a.nom_a, p.nom_p, imp.horario,
+                   i.n1, i.n2, i.n3,
+                   (i.n1 * 0.35 + i.n2 * 0.35 + i.n3 * 0.30) AS definitiva
+            FROM Inscribe i
+            JOIN Estudiantes e ON i.cod_e = e.cod_e
+            JOIN Asignaturas a ON i.cod_a = a.cod_a
+            JOIN Profesores p ON i.id_p = p.id_p
+            JOIN Imparte imp ON i.id_p = imp.id_p AND i.cod_a = imp.cod_a AND i.grupo = imp.grupo
+            WHERE i.id_p = ?
+            ORDER BY e.nom_e, a.nom_a
+            """;
+        try (Connection conn = ConexionBD.conectar();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, idP);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapearDetalle(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
     public List<InscripcionDetalle> listarPorEstudiante(int codE) throws SQLException {
         List<InscripcionDetalle> lista = new ArrayList<>();
         String sql = """
