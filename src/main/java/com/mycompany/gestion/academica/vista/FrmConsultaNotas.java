@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
 package com.mycompany.gestion.academica.vista;
 
 import com.mycompany.gestion.academica.controlador.InscripcionController;
@@ -118,6 +122,7 @@ public class FrmConsultaNotas extends javax.swing.JFrame {
     }
 
     @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         pnlTitulo = new javax.swing.JPanel();
         lblTitulo = new javax.swing.JLabel();
@@ -227,8 +232,9 @@ public class FrmConsultaNotas extends javax.swing.JFrame {
                         .addComponent(pnlFormulario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(scrollTabla, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)));
         pack();
-    }
+    }// </editor-fold>//GEN-END:initComponents
 
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblCursoInscrito;
     private javax.swing.JLabel lblDefinitiva;
     private javax.swing.JLabel lblEstudiante;
@@ -247,4 +253,5 @@ public class FrmConsultaNotas extends javax.swing.JFrame {
     private javax.swing.JTextField txtN1;
     private javax.swing.JTextField txtN2;
     private javax.swing.JTextField txtN3;
+    // End of variables declaration//GEN-END:variables
 }

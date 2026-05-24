@@ -6,7 +6,6 @@ package com.mycompany.gestion.academica.vista;
 
 import com.mycompany.gestion.academica.controlador.LoginController;
 import com.mycompany.gestion.academica.modelo.TipoUsuario;
-import com.mycompany.gestion.academica.servicio.AutenticacionService;
 import javax.swing.JOptionPane;
 
 /**
@@ -19,9 +18,51 @@ public class Login extends javax.swing.JFrame {
 
     public Login() {
         initComponents();
+        configurarApariencia();
         configurarEventos();
-        actualizarEtiquetaUsuario();
         setLocationRelativeTo(null);
+    }
+
+    /** Colores en ejecución (Nimbus); tamaños y posición se editan en la pestaña Design. */
+    private void configurarApariencia() {
+        java.awt.Color azul = new java.awt.Color(41, 98, 155);
+        cmbTipoUsuario.setBackground(java.awt.Color.WHITE);
+        estilarBotonPrimario(btnIngresar, azul);
+        btnSalir.setFocusPainted(false);
+    }
+
+    /** Look and feel usado al iniciar la aplicación (mismo criterio que el diseñador). */
+    public static void aplicarLookAndFeel() {
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+            javax.swing.UIManager.put("ComboBox.background", java.awt.Color.WHITE);
+            javax.swing.UIManager.put("ComboBox.foreground", java.awt.Color.BLACK);
+        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
+            logger.log(java.util.logging.Level.SEVERE, null, ex);
+        }
+    }
+
+    private void estilarBotonPrimario(javax.swing.JButton boton, java.awt.Color fondo) {
+        javax.swing.UIDefaults overrides = new javax.swing.UIDefaults();
+        overrides.put("Button.background", new javax.swing.plaf.ColorUIResource(fondo));
+        overrides.put("Button.foreground", new javax.swing.plaf.ColorUIResource(java.awt.Color.WHITE));
+        overrides.put("Button[Enabled].textForeground", new javax.swing.plaf.ColorUIResource(java.awt.Color.WHITE));
+        overrides.put("Button.contentAreaFilled", Boolean.TRUE);
+        overrides.put("Button.opaque", Boolean.TRUE);
+        boton.putClientProperty("Nimbus.Overrides", overrides);
+        boton.putClientProperty("Nimbus.Overrides.InheritDefaults", true);
+
+        boton.setContentAreaFilled(true);
+        boton.setOpaque(true);
+        boton.setBorderPainted(false);
+        boton.setBackground(fondo);
+        boton.setForeground(java.awt.Color.WHITE);
+        boton.setFocusPainted(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -34,7 +75,7 @@ public class Login extends javax.swing.JFrame {
         lblSubtitulo = new javax.swing.JLabel();
         pnlCampos = new javax.swing.JPanel();
         lblTipoUsuario = new javax.swing.JLabel();
-        cmbTipoUsuario = new javax.swing.JComboBox<>();
+        cmbTipoUsuario = new javax.swing.JComboBox();
         lblUsuario = new javax.swing.JLabel();
         txtUsuario = new javax.swing.JTextField();
         lblContrasena = new javax.swing.JLabel();
@@ -52,12 +93,12 @@ public class Login extends javax.swing.JFrame {
         pnlEncabezado.setBackground(new java.awt.Color(41, 98, 155));
         pnlEncabezado.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        lblTitulo.setFont(new java.awt.Font("Segoe UI", 1, 22));
+        lblTitulo.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
         lblTitulo.setForeground(new java.awt.Color(255, 255, 255));
         lblTitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblTitulo.setText("Gestión Académica");
 
-        lblSubtitulo.setFont(new java.awt.Font("Segoe UI", 0, 13));
+        lblSubtitulo.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         lblSubtitulo.setForeground(new java.awt.Color(220, 230, 245));
         lblSubtitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblSubtitulo.setText("Ingrese sus credenciales para continuar");
@@ -78,59 +119,70 @@ public class Login extends javax.swing.JFrame {
         );
 
         pnlCampos.setBackground(new java.awt.Color(255, 255, 255));
-        pnlCampos.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createLineBorder(new java.awt.Color(210, 218, 228)),
-                javax.swing.BorderFactory.createEmptyBorder(24, 24, 24, 24)));
-        pnlCampos.setLayout(new java.awt.GridBagLayout());
-        java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
-        gbc.insets = new java.awt.Insets(6, 4, 6, 4);
-        gbc.anchor = java.awt.GridBagConstraints.WEST;
+        pnlCampos.setBorder(javax.swing.BorderFactory.createCompoundBorder());
 
         lblTipoUsuario.setText("Tipo de usuario:");
-        gbc.gridx = 0; gbc.gridy = 0;
-        pnlCampos.add(lblTipoUsuario, gbc);
-        cmbTipoUsuario.setModel(new javax.swing.DefaultComboBoxModel<>(new String[]{
-            "-- Seleccione --", "Administrador", "Estudiante", "Profesor"
-        }));
-        gbc.gridx = 0; gbc.gridy = 1; gbc.fill = java.awt.GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
-        pnlCampos.add(cmbTipoUsuario, gbc);
+
+        cmbTipoUsuario.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "-- Seleccione --", "Administrador", "Estudiante", "Profesor" }));
+        cmbTipoUsuario.setPreferredSize(new java.awt.Dimension(352, 28));
 
         lblUsuario.setText("Usuario:");
-        gbc.gridx = 0; gbc.gridy = 2; gbc.fill = java.awt.GridBagConstraints.NONE; gbc.weightx = 0;
-        pnlCampos.add(lblUsuario, gbc);
+
         txtUsuario.setColumns(22);
-        gbc.gridx = 0; gbc.gridy = 3; gbc.fill = java.awt.GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
-        pnlCampos.add(txtUsuario, gbc);
+        txtUsuario.setPreferredSize(new java.awt.Dimension(352, 26));
+        txtUsuario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtUsuarioActionPerformed(evt);
+            }
+        });
 
         lblContrasena.setText("Contraseña:");
-        gbc.gridx = 0; gbc.gridy = 4; gbc.fill = java.awt.GridBagConstraints.NONE; gbc.weightx = 0;
-        pnlCampos.add(lblContrasena, gbc);
+
         txtContrasena.setColumns(22);
-        gbc.gridx = 0; gbc.gridy = 5; gbc.fill = java.awt.GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
-        pnlCampos.add(txtContrasena, gbc);
+        txtContrasena.setPreferredSize(new java.awt.Dimension(352, 26));
 
         btnIngresar.setBackground(new java.awt.Color(41, 98, 155));
-        btnIngresar.setFont(new java.awt.Font("Segoe UI", 1, 13));
+        btnIngresar.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
         btnIngresar.setForeground(new java.awt.Color(255, 255, 255));
         btnIngresar.setText("Ingresar");
         btnIngresar.setFocusPainted(false);
-        btnIngresar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnIngresarActionPerformed(evt);
-            }
-        });
-        gbc.gridx = 0; gbc.gridy = 6; gbc.insets = new java.awt.Insets(16, 4, 4, 4);
-        gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        pnlCampos.add(btnIngresar, gbc);
+        btnIngresar.setPreferredSize(new java.awt.Dimension(72, 28));
 
         btnSalir.setText("Salir");
-        btnSalir.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSalirActionPerformed(evt);
-            }
-        });
-        gbc.gridy = 7; gbc.insets = new java.awt.Insets(4, 4, 4, 4);
-        pnlCampos.add(btnSalir, gbc);
+        btnSalir.setPreferredSize(new java.awt.Dimension(72, 28));
+
+        javax.swing.GroupLayout pnlCamposLayout = new javax.swing.GroupLayout(pnlCampos);
+        pnlCampos.setLayout(pnlCamposLayout);
+        pnlCamposLayout.setHorizontalGroup(
+            pnlCamposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(lblTipoUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(cmbTipoUsuario, 0, 392, Short.MAX_VALUE)
+            .addComponent(lblUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(txtUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(lblContrasena, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(txtContrasena, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnSalir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnIngresar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        pnlCamposLayout.setVerticalGroup(
+            pnlCamposLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlCamposLayout.createSequentialGroup()
+                .addComponent(lblTipoUsuario)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbTipoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblUsuario)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblContrasena)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtContrasena, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(16, 16, 16)
+                .addComponent(btnIngresar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnSalir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
 
         javax.swing.GroupLayout pnlContenedorLayout = new javax.swing.GroupLayout(pnlContenedor);
         pnlContenedor.setLayout(pnlContenedorLayout);
@@ -176,53 +228,35 @@ public class Login extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnIngresarActionPerformed
 
+    /** Enlaza botones aquí para que NetBeans no los quite al guardar el .form */
     private void configurarEventos() {
-        cmbTipoUsuario.addActionListener(e -> actualizarEtiquetaUsuario());
-    }
-
-    private void actualizarEtiquetaUsuario() {
-        String tipo = (String) cmbTipoUsuario.getSelectedItem();
-        if ("Administrador".equals(tipo)) {
-            lblUsuario.setText("Usuario (admin):");
-            txtUsuario.setToolTipText("Usuario: " + AutenticacionService.ADMIN_USUARIO);
-        } else if ("Estudiante".equals(tipo)) {
-            lblUsuario.setText("Código de estudiante:");
-            txtUsuario.setToolTipText("Código numérico registrado en Estudiantes");
-        } else if ("Profesor".equals(tipo)) {
-            lblUsuario.setText("ID de profesor:");
-            txtUsuario.setToolTipText("ID numérico registrado en Profesores");
-        } else {
-            lblUsuario.setText("Usuario:");
-            txtUsuario.setToolTipText(null);
-        }
+        btnIngresar.addActionListener(this::btnIngresarActionPerformed);
+        btnSalir.addActionListener(this::btnSalirActionPerformed);
+        txtContrasena.addActionListener(this::btnIngresarActionPerformed);
+        btnIngresar.setEnabled(true);
+        btnIngresar.setFocusable(true);
     }
 
     private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
         System.exit(0);
     }//GEN-LAST:event_btnSalirActionPerformed
 
-    public static void main(String args[]) {
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
+    private void txtUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUsuarioActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtUsuarioActionPerformed
 
+    public static void main(String args[]) {
+        aplicarLookAndFeel();
         java.awt.EventQueue.invokeLater(() -> new Login().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnIngresar;
     private javax.swing.JButton btnSalir;
-    private javax.swing.JComboBox<String> cmbTipoUsuario;
+    private javax.swing.JComboBox cmbTipoUsuario;
     private javax.swing.JLabel lblContrasena;
-    private javax.swing.JLabel lblTipoUsuario;
     private javax.swing.JLabel lblSubtitulo;
+    private javax.swing.JLabel lblTipoUsuario;
     private javax.swing.JLabel lblTitulo;
     private javax.swing.JLabel lblUsuario;
     private javax.swing.JPanel pnlCampos;
